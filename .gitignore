@@ -3,3 +3,5 @@
 *.o
 surefire-reports/*
 target/
+.classpath
+.project
