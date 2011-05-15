@@ -5,3 +5,4 @@ surefire-reports/*
 target/
 .classpath
 .project
+.settings

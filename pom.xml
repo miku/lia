@@ -12,5 +12,6 @@
   </properties>
   <modules>
     <module>simple-indexer</module>
+    <module>simple-searcher</module>
   </modules>
 </project>

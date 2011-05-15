@@ -1,5 +1,18 @@
 package com.miku.lia;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileReader;
+import java.io.IOException;
+
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
+
 public class Indexer {
     
     public static void main(String[] args) throws Exception {
@@ -15,7 +28,7 @@ public class Indexer {
         long start = System.currentTimeMillis();
         
         Indexer indexer = new Indexer(indexDir);
-        int numIndexed;
+        long numIndexed;
         
         try {
             numIndexed = indexer.index(dataDir, new TextFilesFilter());
@@ -42,21 +55,25 @@ public class Indexer {
         writer.close();
     }
     
-    public int index(String dataDir, FileFilter filter) throws Exception {
-        
-        File[] files = new File(dataDir).listFiles;
+    public long index(String dataDir, FileFilter filter) throws Exception {
+
+    	File[] files = new File(dataDir).listFiles();
         for (File f : files) {
             if (!f.isDirectory() && 
                 !f.isHidden() && 
-                f.exists() && 
+                f.exists() &&
+				f.length() < 1000000 &&
                 f.canRead() && (filter == null || filter.accept(f))) {
                     indexFile(f);
+                } else if (f.isDirectory() && f.canRead()) {
+					index(f.getAbsolutePath(), filter);
                 }
         }
+
         return writer.numDocs();
     }
     
-    private static class TextFilesFilter implements FileFilter {
+	private static class TextFilesFilter implements FileFilter {
         public boolean accept(File path) {
             return path.getName().toLowerCase().endsWith("txt");
         }
@@ -73,7 +90,7 @@ public class Indexer {
     }
     
     private void indexFile(File f) throws Exception {
-        System.out.println("Indexing " + f.getCanonicalPath());
+        System.out.println("Indexing " + f.getCanonicalPath() + " (" + f.length() + ")");
         Document doc = getDocument(f);
         writer.addDocument(doc);
     }
