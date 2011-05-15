@@ -1,0 +1,7 @@
+README
+------
+
+To build submodules:
+
+	$ mvn package
+
